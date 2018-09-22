@@ -1,4 +1,4 @@
-package com.filteredimageupload;
+package com.lanterassurance;
 
 import android.os.Bundle;
 import android.os.PersistableBundle;
