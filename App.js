@@ -13,8 +13,11 @@ import {
   Text,
   View,
   Picker,
-  TouchableHighlight
+  TouchableHighlight,
+
 } from "react-native";
+import { RNCamera } from "react-native-camera";
+import firebase from "react-native-firebase";
 
 type Props = {};
 type State = {};
@@ -37,11 +40,53 @@ export default class App extends Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = defaultState;
+    this.onClickPicture = this.onClickPicture.bind(this);
   }
+
+  componentDidMount() {
+  }
+
+  onClickPicture() {
+    const options = {
+      quality: 0.5,
+      base64: true,
+      doNotSave: true,
+      skipProcessing: true
+    };
+    if (this.camera.getStatus() == "READY") {
+      this.camera
+        .takePictureAsync(options)
+        .then(data => {
+          this.camera.pausePreview();
+          console.log(data);
+          console.log(data.uri);
+          this.camera.resumePreview();
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    } else {
+      console.log("Camera not ready");
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
-        <View style={styles.camera} />
+        <View style={styles.camera}>
+          <RNCamera
+            ref={ref => {
+              this.camera = ref;
+            }}
+            style={{ flex: 1 }}
+            type={RNCamera.Constants.Type.back}
+            flashMode={RNCamera.Constants.FlashMode.auto}
+            permissionDialogTitle={"Permission to use camera"}
+            permissionDialogMessage={
+              "We need your permission to use your camera phone"
+            }
+          />
+        </View>
         <View style={{ flex: 0.25 }}>
           <View style={{ flexDirection: "row", backgroundColor: "#ddd" }}>
             <Picker
@@ -96,7 +141,7 @@ export default class App extends Component<Props, State> {
                   flex: 1,
                   justifyContent: "center"
                 }}
-                onPress={() => {}}
+                onPress={this.onClickPicture}
               >
                 <Text
                   style={{ color: "#fff", fontSize: 16, textAlign: "center" }}
@@ -124,6 +169,10 @@ export default class App extends Component<Props, State> {
         </View>
       </View>
     );
+  }
+
+  componentWillUnmount() {
+    // Remove the alert located on this master page from the manager
   }
 }
 
