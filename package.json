@@ -12,7 +12,11 @@
     "react-native": "0.57.1",
     "react-native-camera": "git+https://git@github.com/react-native-community/react-native-camera",
     "react-native-firebase": "^5.0.0-rc4",
-    "react-native-flash-message": "^0.1.10"
+    "react-native-flash-message": "^0.1.10",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-logger": "^3.0.6",
+    "redux-persist": "^5.10.0"
   },
   "devDependencies": {
     "babel-jest": "23.6.0",
