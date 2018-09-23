@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.invertase.firebase.RNFirebasePackage;
+import io.invertase.firebase.database.RNFirebaseDatabasePackage;
 import io.invertase.firebase.storage.RNFirebaseStoragePackage;
 
 public class MainApplication extends Application implements ReactApplication {
@@ -30,7 +31,8 @@ public class MainApplication extends Application implements ReactApplication {
                     new MainReactPackage(),
                     new RNCameraPackage(),
                     new RNFirebasePackage(),
-                    new RNFirebaseStoragePackage()
+                    new RNFirebaseStoragePackage(),
+                    new RNFirebaseDatabasePackage()
             );
         }
 

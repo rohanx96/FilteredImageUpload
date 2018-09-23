@@ -23,6 +23,7 @@ import moment from "moment";
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { loaderDialog, actionDialog } from "./../common/BottomDialogs";
 import { requestPermissions } from "./../common/Permissions";
+import { getDataFromFirebase } from "./TakePictureAction";
 
 type Props = {};
 type State = {};
@@ -49,6 +50,7 @@ export default class App extends Component<Props, State> {
 
   componentDidMount() {
     this.requestCameraPermissions();
+    getDataFromFirebase();
   }
 
   requestCameraPermissions() {
@@ -206,17 +208,18 @@ export default class App extends Component<Props, State> {
             />
           )}
           {!this.state.pictureData &&
-            this.state.hasPermissions &&
-              (
+            this.state.hasPermissions && (
+              <View style={{ flex: 1 }}>
                 <RNCamera
                   ref={ref => {
                     this.camera = ref;
                   }}
                   style={{ flex: 1 }}
                   type={RNCamera.Constants.Type.back}
-                  flashMode={RNCamera.Constants.FlashMode.auto}
+                  flashMode={RNCamera.Constants.FlashMode.off}
                 />
-              )}
+              </View>
+            )}
         </View>
         <View style={{ flex: 0.25 }}>
           <View style={{ flexDirection: "row", backgroundColor: "#ddd" }}>
