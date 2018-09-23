@@ -12,29 +12,28 @@ import {
   StyleSheet,
   Text,
   View,
+  Modal,
   Picker,
-  TouchableHighlight,
-
+  ActivityIndicator,
+  TouchableHighlight
 } from "react-native";
 import { RNCamera } from "react-native-camera";
 import firebase from "react-native-firebase";
 import moment from "moment";
+import FlashMessage, {
+  showMessage,
+  hideMessage
+} from "react-native-flash-message";
 
 type Props = {};
 type State = {};
 let defaultState = {
   selectedPrimaryFilter: undefined,
-  selectedSecondaryFilter: undefined
+  selectedSecondaryFilter: undefined,
+  showModal: false
 };
 
-let primaryFilter = [
-  "Select primary filter",
-  "First",
-  "Second",
-  "Third",
-  "Fourth",
-  "Fifth"
-];
+let primaryFilter = ["First", "Second", "Third", "Fourth", "Fifth"];
 
 let secondaryFilter = ["SecFirst", "SecSecond", "SecThird"];
 export default class App extends Component<Props, State> {
@@ -140,8 +139,13 @@ export default class App extends Component<Props, State> {
                 this.setState({ selectedPrimaryFilter: itemValue })
               }
             >
+              <Picker.Item
+                key={"filler"}
+                label={"-- Select Filter --"}
+                value={undefined}
+              />
               {primaryFilter.map((data, index) => (
-                <Picker.Item label={data} value={data} />
+                <Picker.Item key={data} label={data} value={data} />
               ))}
             </Picker>
             <Picker
@@ -153,6 +157,11 @@ export default class App extends Component<Props, State> {
               }
               enabled={this.state.selectedPrimaryFilter ? true : false}
             >
+              <Picker.Item
+                key={"filler"}
+                label={"-- Select Filter --"}
+                value={undefined}
+              />
               {secondaryFilter.map((data, index) => (
                 <Picker.Item label={data} value={data} />
               ))}
@@ -210,6 +219,46 @@ export default class App extends Component<Props, State> {
             </View>
           </View>
         </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={this.state.showModal}
+          onRequestClose={() => {
+            console.log("Visible");
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              paddingHorizontal: 22,
+              borderRadius: 12,
+              justifyContent: "flex-end",
+              backgroundColor: "#33333333"
+            }}
+          >
+            <View style={{ backgroundColor: "#fff", padding: 24 }}>
+              <Text style={{ fontSize: 18 }}>Please Wait..</Text>
+              <ActivityIndicator />
+              <TouchableHighlight
+                style={{
+                  backgroundColor: "#f50057",
+                  marginVertical: 12,
+                  padding: 12
+                }}
+                onPress={() => {
+                  this.setState({
+                    showModal: false
+                  });
+                }}
+              >
+                <Text style={{ textAlign: "center", color: "#fff" }}>
+                  Cancel
+                </Text>
+              </TouchableHighlight>
+            </View>
+          </View>
+        </Modal>
+        <FlashMessage position="bottom" />
       </View>
     );
   }
