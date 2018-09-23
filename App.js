@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { RNCamera } from "react-native-camera";
 import firebase from "react-native-firebase";
+import moment from "moment";
 
 type Props = {};
 type State = {};
@@ -41,33 +42,75 @@ export default class App extends Component<Props, State> {
     super(props);
     this.state = defaultState;
     this.onClickPicture = this.onClickPicture.bind(this);
+    this.createFileName = this.createFileName.bind(this);
   }
 
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
   onClickPicture() {
-    const options = {
-      quality: 0.5,
-      base64: true,
-      doNotSave: true,
-      skipProcessing: true
-    };
-    if (this.camera.getStatus() == "READY") {
-      this.camera
-        .takePictureAsync(options)
-        .then(data => {
-          this.camera.pausePreview();
-          console.log(data);
-          console.log(data.uri);
-          this.camera.resumePreview();
-        })
-        .catch(err => {
-          console.log(err);
+    if (
+      this.state.selectedPrimaryFilter &&
+      this.state.selectedSecondaryFilter
+    ) {
+      this.setState({
+        showModal: true
+      });
+      const options = {
+        width: 1024
+      };
+      if (this.camera.getStatus() == "READY") {
+        this.camera
+          .takePictureAsync(options)
+          .then(data => {
+            this.camera.pausePreview();
+            console.log(data);
+            firebase
+              .storage()
+              .ref(this.state.selectedPrimaryFilter)
+              .child(this.state.selectedSecondaryFilter)
+              .child(this.createFileName())
+              .putFile(data.uri)
+              .then(success => {
+                console.log(success);
+                this.setState({
+                  selectedSecondaryFilter: undefined,
+                  showModal: false
+                });
+                this.camera.resumePreview();
+              })
+              .catch(err => {
+                console.log(err);
+              });
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      } else {
+        console.log("Camera not ready");
+        showMessage({
+          description:
+            "Please make sure you have granted camera permission to Lanter Assurance",
+          message: "Could not connect to camera",
+          type: "danger"
         });
+      }
     } else {
-      console.log("Camera not ready");
+      showMessage({
+        description: "Please select appropriate filters first.",
+        message: "Set Filters",
+        type: "danger"
+      });
     }
+  }
+
+  createFileName() {
+    return (
+      this.state.selectedPrimaryFilter +
+      "_" +
+      this.state.selectedSecondaryFilter +
+      "_" +
+      moment().format()
+    );
   }
 
   render() {

@@ -2,7 +2,6 @@ package com.lanterassurance;
 
 import android.app.Application;
 
-import com.azendoo.reactnativesnackbar.SnackbarPackage;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -15,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.invertase.firebase.RNFirebasePackage;
+import io.invertase.firebase.storage.RNFirebaseStoragePackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -29,7 +29,8 @@ public class MainApplication extends Application implements ReactApplication {
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
                     new RNCameraPackage(),
-                    new RNFirebasePackage()
+                    new RNFirebasePackage(),
+                    new RNFirebaseStoragePackage()
             );
         }
 
