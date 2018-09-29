@@ -23,7 +23,6 @@ import moment from "moment";
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { loaderDialog, actionDialog } from "./../common/BottomDialogs";
 import { requestPermissions } from "./../common/Permissions";
-import { getDataFromFirebase } from "./TakePictureAction";
 
 type Props = {};
 type State = {};
@@ -34,23 +33,22 @@ let defaultState = {
   pictureData: undefined,
   hasPermissions: false
 };
-
-let primaryFilter = ["First", "Second", "Third", "Fourth", "Fifth"];
-
-let secondaryFilter = ["SecFirst", "SecSecond", "SecThird"];
 export default class App extends Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = defaultState;
+    this.state.selectedPrimaryFilter = this.props.selectedPrimaryFilter;
+    this.customer = "HYU";
     this.onClickPicture = this.onClickPicture.bind(this);
     this.createFileName = this.createFileName.bind(this);
     this.requestCameraPermissions = this.requestCameraPermissions.bind(this);
     this.onClear = this.onClear.bind(this);
+    primaryFilter = this.props.hubs;
   }
 
   componentDidMount() {
     this.requestCameraPermissions();
-    getDataFromFirebase();
+    this.props.getHubs(this.customer);
   }
 
   requestCameraPermissions() {
@@ -103,6 +101,7 @@ export default class App extends Component<Props, State> {
         selectedSecondaryFilter: undefined
       });
     } else if (this.state.selectedPrimaryFilter) {
+      this.props.setPrimaryFilter(undefined)
       this.setState({
         selectedPrimaryFilter: undefined
       });
@@ -115,16 +114,16 @@ export default class App extends Component<Props, State> {
         this.state.selectedPrimaryFilter &&
         this.state.selectedSecondaryFilter
       ) {
-        this.props.openBottomSheet(() => {
-          return loaderDialog(
-            "Processing. Please keep the camera stable.",
-            undefined
-          );
-        }, false);
         const options = {
           width: 1024
         };
-        if (this.camera.getStatus() == "READY") {
+        if (this.camera && this.camera.getStatus() == "READY") {
+          this.props.openBottomSheet(() => {
+            return loaderDialog(
+              "Processing. Please keep the camera stable.",
+              undefined
+            );
+          }, false);
           this.camera
             .takePictureAsync(options)
             .then(data => {
@@ -148,30 +147,46 @@ export default class App extends Component<Props, State> {
         }
       } else {
         showMessage({
-          description: "Please select appropriate filters first.",
+          description: "Please select a hub and corresponding dealer first.",
           message: "Set Filters",
           type: "danger"
         });
       }
     } else {
+      let shouldCancel = false;
       this.props.openBottomSheet(() => {
         return loaderDialog("Uploading image. Please Wait", () => {
+          shouldCancel = true;
           this.props.closeBottomSheet();
         });
       }, false);
+      let fileName = this.createFileName();
+      let hub = this.state.selectedPrimaryFilter;
+      let dealer = this.state.selectedSecondaryFilter;
       firebase
         .storage()
-        .ref(this.state.selectedPrimaryFilter)
-        .child(this.state.selectedSecondaryFilter)
-        .child(this.createFileName())
+        .ref(this.customer)
+        .child(hub)
+        .child(dealer)
+        .child(fileName)
         .putFile(this.state.pictureData.uri)
         .then(success => {
           console.log(success);
-          this.props.closeBottomSheet();
-          this.setState({
-            selectedSecondaryFilter: undefined,
-            pictureData: undefined
-          });
+          if (!shouldCancel) {
+            this.props.closeBottomSheet();
+            this.setState({
+              selectedSecondaryFilter: undefined,
+              pictureData: undefined
+            });
+          } else {
+            firebase
+              .storage()
+              .ref(this.customer)
+              .child(hub)
+              .child(dealer)
+              .child(fileName)
+              .delete();
+          }
           // if (this.camera) {
           //   this.camera.resumePreview();
           // }
@@ -188,6 +203,8 @@ export default class App extends Component<Props, State> {
 
   createFileName() {
     return (
+      this.customer +
+      "_" +
       this.state.selectedPrimaryFilter +
       "_" +
       this.state.selectedSecondaryFilter +
@@ -197,6 +214,7 @@ export default class App extends Component<Props, State> {
   }
 
   render() {
+    let buttonColor = this.state.pictureData ? "#FF9800" : "#018786";
     return (
       <View style={styles.container}>
         <View style={styles.camera}>
@@ -227,16 +245,24 @@ export default class App extends Component<Props, State> {
               style={styles.picker}
               selectedValue={this.state.selectedPrimaryFilter}
               mode="dropdown"
-              onValueChange={(itemValue, itemIndex) =>
-                this.setState({ selectedPrimaryFilter: itemValue })
-              }
+              onValueChange={(itemValue, itemIndex) => {
+                if (itemValue) {
+                  this.props.setPrimaryFilter(itemValue)
+                  this.props.getDealers(this.customer, itemValue);
+                }
+                this.setState({
+                  selectedPrimaryFilter: itemValue,
+                  selectedSecondaryFilter: undefined,
+                  pictureData: undefined
+                });
+              }}
             >
               <Picker.Item
                 key={"filler"}
-                label={"-- Select Filter --"}
+                label={"-- Select Hub --"}
                 value={undefined}
               />
-              {primaryFilter.map((data, index) => (
+              {this.props.hubs.map((data, index) => (
                 <Picker.Item key={data} label={data} value={data} />
               ))}
             </Picker>
@@ -251,10 +277,10 @@ export default class App extends Component<Props, State> {
             >
               <Picker.Item
                 key={"filler"}
-                label={"-- Select Filter --"}
+                label={"-- Select Dealer --"}
                 value={undefined}
               />
-              {secondaryFilter.map((data, index) => (
+              {this.props.dealers.map((data, index) => (
                 <Picker.Item label={data} value={data} />
               ))}
             </Picker>
@@ -264,7 +290,7 @@ export default class App extends Component<Props, State> {
           >
             <TouchableHighlight
               style={{
-                backgroundColor: "#018786",
+                backgroundColor: buttonColor,
                 padding: 12,
                 flex: 0.55,
                 justifyContent: "center"

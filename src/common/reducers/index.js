@@ -1,5 +1,6 @@
 //@flow
 import { appReducer } from "./../../app/AppReducer";
+import { takePictureReducer } from "./../../takePicture/TakePictureReducer";
 import { combineReducers } from "redux";
 import { PersistReducer } from "./PersistReducer";
 import { persistReducer, createTransform } from "redux-persist";
@@ -14,7 +15,8 @@ const persistConfig = {
 
 const AppReducer = combineReducers({
   app: appReducer,
-  persist: PersistReducer,
+  takePicture: takePictureReducer,
+  persist: PersistReducer
 });
 
 const RootReducer = (state, action) => {

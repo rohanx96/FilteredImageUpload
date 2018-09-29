@@ -20,7 +20,7 @@ export function loaderDialog(header, onCancel) {
           style={{
             backgroundColor: "#f50057",
             marginVertical: 12,
-            padding: 12
+            padding: 16
           }}
           onPress={() => {
             onCancel();
