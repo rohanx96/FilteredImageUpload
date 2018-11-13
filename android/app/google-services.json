@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "831195163545",
+    "firebase_url": "https://lanter-assurance-v1.firebaseio.com",
+    "project_id": "lanter-assurance-v1",
+    "storage_bucket": "lanter-assurance-v1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831195163545:android:a5ed41e28bbd618f",
+        "android_client_info": {
+          "package_name": "com.lanterassurance"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "831195163545-1gosrm3m9r1kaqf1svtg8s47k3edc6o5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lanterassurance",
+            "certificate_hash": "95fe387d9fdbdcb28a497408d1e37f957106cb12"
+          }
+        },
+        {
+          "client_id": "831195163545-0oo8in8b4ngbip7olsko7rtne4ahbrsi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBB7_VfO5Sa8NvyOH1Q3jPI3QXZVT511PI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "831195163545-0oo8in8b4ngbip7olsko7rtne4ahbrsi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
