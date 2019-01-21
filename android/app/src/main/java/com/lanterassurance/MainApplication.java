@@ -3,6 +3,16 @@ package com.lanterassurance;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
+import com.jimmydaddy.imagemarker.ImageMarkerPackage;
+import io.invertase.firebase.RNFirebasePackage;
+import org.reactnative.camera.RNCameraPackage;
+import com.jimmydaddy.imagemarker.ImageMarkerPackage;
+
+import io.invertase.firebase.RNFirebasePackage;
+
+import org.reactnative.camera.RNCameraPackage;
+
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -16,6 +26,7 @@ import java.util.List;
 import io.invertase.firebase.RNFirebasePackage;
 import io.invertase.firebase.database.RNFirebaseDatabasePackage;
 import io.invertase.firebase.storage.RNFirebaseStoragePackage;
+import io.invertase.firebase.auth.RNFirebaseAuthPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -29,10 +40,13 @@ public class MainApplication extends Application implements ReactApplication {
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
-                    new RNCameraPackage(),
+            new RNGestureHandlerPackage(),
+                    new ImageMarkerPackage(),
                     new RNFirebasePackage(),
+                    new RNCameraPackage(),
                     new RNFirebaseStoragePackage(),
-                    new RNFirebaseDatabasePackage()
+                    new RNFirebaseDatabasePackage(),
+                    new RNFirebaseAuthPackage()
             );
         }
 
