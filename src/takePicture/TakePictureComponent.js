@@ -15,14 +15,22 @@ import {
   TouchableHighlight,
   Image,
   BackHandler,
-  PermissionsAndroid
+  Platform,
+  PermissionsAndroid,
+  TouchableOpacity
 } from "react-native";
 import { RNCamera } from "react-native-camera";
-import firebase from "react-native-firebase";
+import firebase, { auth } from "react-native-firebase";
 import moment from "moment";
 import { showMessage, hideMessage } from "react-native-flash-message";
-import { loaderDialog, actionDialog } from "./../common/BottomDialogs";
+import {
+  loaderDialog,
+  actionDialog,
+  listDialog
+} from "./../common/BottomDialogs";
 import { requestPermissions } from "./../common/Permissions";
+import ImageMarker from "react-native-image-marker";
+import * as Animatable from "react-native-animatable";
 
 type Props = {};
 type State = {};
@@ -30,7 +38,8 @@ type State = {};
 let defaultState = {
   selectedPrimaryFilter: undefined,
   selectedSecondaryFilter: undefined,
-  pictureData: undefined,
+  pictureData: [],
+  takePhoto: true,
   hasPermissions: false
 };
 export default class App extends Component<Props, State> {
@@ -48,7 +57,24 @@ export default class App extends Component<Props, State> {
 
   componentDidMount() {
     this.requestCameraPermissions();
-    this.props.getHubs(this.customer);
+    if (auth().currentUser) {
+      this.props.getHubs(this.customer);
+    } else {
+      auth()
+        .signInAnonymously()
+        .then(data => {
+          console.log("---SIGNED IN ---");
+          this.props.getHubs(this.customer);
+        })
+        .catch(err => {
+          showMessage({
+            description:
+              "Please make sure you are connected to the internet and try again.",
+            message: "Failed to fetch data",
+            type: "danger"
+          });
+        });
+    }
   }
 
   requestCameraPermissions() {
@@ -88,20 +114,25 @@ export default class App extends Component<Props, State> {
     );
   }
 
+  isPictureTaken = () => {
+    return this.state.pictureData && this.state.pictureData.length > 0;
+  };
+
   onClear() {
-    if (this.state.pictureData) {
+    if (this.isPictureTaken()) {
       if (this.camera) {
         this.camera.resumePreview();
       }
       this.setState({
-        pictureData: undefined
+        takePhoto: true,
+        pictureData: []
       });
     } else if (this.state.selectedSecondaryFilter) {
       this.setState({
         selectedSecondaryFilter: undefined
       });
     } else if (this.state.selectedPrimaryFilter) {
-      this.props.setPrimaryFilter(undefined)
+      this.props.setPrimaryFilter(undefined);
       this.setState({
         selectedPrimaryFilter: undefined
       });
@@ -109,123 +140,239 @@ export default class App extends Component<Props, State> {
   }
 
   onClickPicture() {
-    if (!this.state.pictureData) {
-      if (
-        this.state.selectedPrimaryFilter &&
-        this.state.selectedSecondaryFilter
-      ) {
-        const options = {
-          width: 1024
-        };
-        if (this.camera && this.camera.getStatus() == "READY") {
-          this.props.openBottomSheet(() => {
-            return loaderDialog(
-              "Processing. Please keep the camera stable.",
-              undefined
-            );
-          }, false);
-          this.camera
-            .takePictureAsync(options)
-            .then(data => {
-              this.props.closeBottomSheet();
-              this.camera.pausePreview();
-              this.setState({
-                pictureData: data
-              });
+    if (
+      this.state.selectedPrimaryFilter &&
+      this.state.selectedSecondaryFilter
+    ) {
+      const options = {
+        width: 1024,
+        fixOrientation: true,
+        forceUpOrientation: true
+      };
+      if (this.camera && this.camera.getStatus() == "READY") {
+        this.props.openBottomSheet(() => {
+          return loaderDialog(
+            "Processing. Please keep the camera stable.",
+            undefined
+          );
+        }, false);
+        this.camera
+          .takePictureAsync(options)
+          .then(data => {
+            this.camera.pausePreview();
+            this.timestamp = moment().format();
+            ImageMarker.markText({
+              src: data.uri,
+              text: this.createFileName(true),
+              position: "topLeft",
+              color: "#FF0000",
+              fontSize: 44,
+              scale: 1,
+              quality: 100
             })
-            .catch(err => {
-              console.log(err);
-            });
-        } else {
-          console.log("Camera not ready");
-          showMessage({
-            description:
-              "Please make sure you have granted camera permission to Lanter Assurance",
-            message: "Could not connect to camera",
-            type: "danger"
+              .then(path => {
+                console.log(path);
+                this.props.closeBottomSheet();
+                let pictureData = this.state.pictureData.slice();
+                pictureData.push({
+                  uri: Platform.OS === "android" ? "file://" + path : path,
+                  timestamp: this.timestamp
+                });
+                this.setState({
+                  takePhoto: false,
+                  pictureData: pictureData
+                });
+                console.log(this.state.pictureData);
+              })
+              .catch(err => console.log(err));
+          })
+          .catch(err => {
+            console.log(err);
           });
-        }
       } else {
+        console.log("Camera not ready");
         showMessage({
-          description: "Please select a hub and corresponding dealer first.",
-          message: "Set Filters",
+          description:
+            "Please make sure you have granted camera permission to Lanter Assurance",
+          message: "Could not connect to camera",
           type: "danger"
         });
       }
     } else {
-      let shouldCancel = false;
-      this.props.openBottomSheet(() => {
-        return loaderDialog("Uploading image. Please Wait", () => {
-          shouldCancel = true;
-          this.props.closeBottomSheet();
-        });
-      }, false);
-      let fileName = this.createFileName();
-      let hub = this.state.selectedPrimaryFilter;
-      let dealer = this.state.selectedSecondaryFilter;
-      firebase
-        .storage()
-        .ref(this.customer)
-        .child(hub)
-        .child(dealer)
-        .child(fileName)
-        .putFile(this.state.pictureData.uri)
-        .then(success => {
-          console.log(success);
-          if (!shouldCancel) {
-            this.props.closeBottomSheet();
-            this.setState({
-              selectedSecondaryFilter: undefined,
-              pictureData: undefined
-            });
-          } else {
-            firebase
-              .storage()
-              .ref(this.customer)
-              .child(hub)
-              .child(dealer)
-              .child(fileName)
-              .delete();
-          }
-          // if (this.camera) {
-          //   this.camera.resumePreview();
-          // }
-        })
-        .catch(err => {
-          console.log(err);
-        });
+      showMessage({
+        description: "Please select a hub and corresponding dealer first.",
+        message: "Set Filters",
+        type: "danger"
+      });
     }
   }
+
+  onUploadImages = index => {
+    let shouldCancel = false;
+    let picture = this.state.pictureData[index];
+    this.props.openBottomSheet(() => {
+      return loaderDialog(
+        `Uploading image ${index + 1} of ${
+          this.state.pictureData.length
+        }\nPlease Wait..`,
+        () => {
+          shouldCancel = true;
+          this.props.closeBottomSheet();
+        }
+      );
+    }, false);
+    let fileName = this.createFileName(false, picture.timestamp);
+    let hub = this.state.selectedPrimaryFilter;
+    let dealer = this.state.selectedSecondaryFilter;
+    console.log(picture);
+    firebase
+      .storage()
+      .ref(this.customer)
+      .child(hub)
+      .child(dealer)
+      .child(fileName)
+      .putFile(picture.uri)
+      .then(success => {
+        console.log(success);
+        if (!shouldCancel) {
+          firebase
+            .database()
+            .ref("imageData")
+            .push(
+              {
+                timestamp: picture.timestamp,
+                customer: this.customer,
+                hub: hub,
+                dealer: dealer,
+                download_url: success.downloadURL,
+                metaData: {
+                  contentType: success.metadata.contentType,
+                  fullPath: success.metadata.fullPath,
+                  size: success.metadata.size,
+                  name: success.metadata.name,
+                  md5Hash: success.metadata.md5Hash
+                }
+              },
+              () => {
+                if (index === this.state.pictureData.length - 1) {
+                  this.props.closeBottomSheet();
+                  this.setState({
+                    selectedSecondaryFilter: undefined,
+                    pictureData: []
+                  });
+                } else {
+                  this.onUploadImages(index + 1);
+                }
+              }
+            );
+        } else {
+          firebase
+            .storage()
+            .ref(this.customer)
+            .child(hub)
+            .child(dealer)
+            .child(fileName)
+            .delete()
+            .then(data => {
+              console.log(data);
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        }
+      })
+      .catch(err => {
+        shouldCancel = true;
+        this.props.closeBottomSheet();
+        showMessage({
+          type: "danger",
+          message: "Something went wrong. Please try again"
+        });
+        console.log(err);
+      });
+  };
+
+  showUploadImageDialog = () => {
+    this.props.openBottomSheet(() => {
+      return listDialog(
+        this.state.pictureData,
+        ({ item }) => (
+          <TouchableOpacity
+            style={{
+              marginRight: 12
+            }}
+            onPress={() => {
+              this.props.navigation.navigate("ImageViewer", {
+                file: item,
+                onDelete: () => {
+                  let index = this.state.pictureData.indexOf(item);
+                  if (index !== -1) {
+                    this.state.pictureData.splice(index, 1);
+                    this.setState({
+                      pictureData: this.state.pictureData.slice()
+                    });
+                    console.log(this.state);
+                  }
+                }
+              });
+              this.props.closeBottomSheet();
+            }}
+          >
+            <Image
+              style={{ height: 144, width: 128, borderRadius: 4 }}
+              source={{
+                uri: item.uri
+              }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        ),
+        item => {
+          return item.uri;
+        },
+        true,
+        () => {
+          this.onUploadImages(0);
+        },
+        () => {
+          this.props.closeBottomSheet();
+        }
+      );
+    }, false);
+  };
 
   onExit() {
     BackHandler.exitApp();
   }
 
-  createFileName() {
-    return (
+  createFileName(addLineBreaks, timestamp) {
+    let fileName =
       this.customer +
-      "_" +
+      (addLineBreaks ? "\n" : "_") +
       this.state.selectedPrimaryFilter +
-      "_" +
+      (addLineBreaks ? "\n" : "_") +
       this.state.selectedSecondaryFilter +
-      "_" +
-      moment().format()
-    );
+      (addLineBreaks ? "\n" : "_") +
+      (timestamp ? timestamp : this.timestamp);
+    console.log(fileName);
+    return fileName;
   }
 
   render() {
-    let buttonColor = this.state.pictureData ? "#FF9800" : "#018786";
     return (
-      <View style={styles.container}>
+      <Animatable.View style={styles.container}>
         <View style={styles.camera}>
-          {this.state.pictureData && (
+          {this.isPictureTaken() && !this.state.takePhoto && (
             <Image
-              source={{ uri: this.state.pictureData.uri }}
+              source={{
+                uri: this.state.pictureData[this.state.pictureData.length - 1]
+                  .uri
+              }}
               resizeMode={"contain"}
               style={{ flex: 1 }}
             />
           )}
-          {!this.state.pictureData &&
+          {(!this.isPictureTaken() || this.state.takePhoto) &&
             this.state.hasPermissions && (
               <View style={{ flex: 1 }}>
                 <RNCamera
@@ -239,105 +386,178 @@ export default class App extends Component<Props, State> {
               </View>
             )}
         </View>
-        <View style={{ flex: 0.25 }}>
-          <View style={{ flexDirection: "row", backgroundColor: "#ddd" }}>
-            <Picker
-              style={styles.picker}
-              selectedValue={this.state.selectedPrimaryFilter}
-              mode="dropdown"
-              onValueChange={(itemValue, itemIndex) => {
-                if (itemValue) {
-                  this.props.setPrimaryFilter(itemValue)
-                  this.props.getDealers(this.customer, itemValue);
-                }
-                this.setState({
-                  selectedPrimaryFilter: itemValue,
-                  selectedSecondaryFilter: undefined,
-                  pictureData: undefined
-                });
-              }}
-            >
-              <Picker.Item
-                key={"filler"}
-                label={"-- Select Hub --"}
-                value={undefined}
-              />
-              {this.props.hubs.map((data, index) => (
-                <Picker.Item key={data} label={data} value={data} />
-              ))}
-            </Picker>
-            <Picker
-              style={styles.picker}
-              mode="dropdown"
-              selectedValue={this.state.selectedSecondaryFilter}
-              onValueChange={(itemValue, itemIndex) =>
-                this.setState({ selectedSecondaryFilter: itemValue })
-              }
-              enabled={this.state.selectedPrimaryFilter ? true : false}
-            >
-              <Picker.Item
-                key={"filler"}
-                label={"-- Select Dealer --"}
-                value={undefined}
-              />
-              {this.props.dealers.map((data, index) => (
-                <Picker.Item label={data} value={data} />
-              ))}
-            </Picker>
-          </View>
-          <View
-            style={{ flex: 1, flexDirection: "row", alignItems: "stretch" }}
+        {!this.isPictureTaken() || this.state.takePhoto ? (
+          <Animatable.View
+            animation="slideInLeft"
+            useNativeDriver={true}
+            style={{ flex: 0.25 }}
           >
-            <TouchableHighlight
-              style={{
-                backgroundColor: buttonColor,
-                padding: 12,
-                flex: 0.55,
-                justifyContent: "center"
-              }}
-              onPress={this.onClickPicture}
-            >
-              <Text
-                style={{ color: "#fff", fontSize: 24, textAlign: "center" }}
+            <View style={{ flexDirection: "row", backgroundColor: "#ddd" }}>
+              <Picker
+                style={styles.picker}
+                selectedValue={this.state.selectedPrimaryFilter}
+                mode="dropdown"
+                onValueChange={(itemValue, itemIndex) => {
+                  if (itemValue) {
+                    this.props.setPrimaryFilter(itemValue);
+                    this.props.getDealers(this.customer, itemValue);
+                  }
+                  this.setState({
+                    selectedPrimaryFilter: itemValue,
+                    selectedSecondaryFilter: undefined,
+                    pictureData: []
+                  });
+                }}
+                enabled={this.isPictureTaken() ? false : true}
               >
-                {this.state.pictureData ? "SEND \nPHOTO" : "TAKE \nPHOTO"}
-              </Text>
-            </TouchableHighlight>
-            <View style={{ flexDirection: "column", flex: 0.45 }}>
+                <Picker.Item
+                  key={"filler"}
+                  label={"-- Select Hub --"}
+                  value={undefined}
+                />
+                {this.props.hubs.map((data, index) => (
+                  <Picker.Item key={data} label={data} value={data} />
+                ))}
+              </Picker>
+              <Picker
+                style={styles.picker}
+                mode="dropdown"
+                selectedValue={this.state.selectedSecondaryFilter}
+                onValueChange={(itemValue, itemIndex) =>
+                  this.setState({ selectedSecondaryFilter: itemValue })
+                }
+                enabled={
+                  this.isPictureTaken()
+                    ? false
+                    : this.state.selectedPrimaryFilter
+                    ? true
+                    : false
+                }
+              >
+                <Picker.Item
+                  key={"filler"}
+                  label={"-- Select Dealer --"}
+                  value={undefined}
+                />
+                {this.props.dealers.map((data, index) => (
+                  <Picker.Item label={data} value={data} />
+                ))}
+              </Picker>
+            </View>
+            <View
+              style={{ flex: 1, flexDirection: "row", alignItems: "stretch" }}
+            >
               <TouchableHighlight
                 style={{
-                  backgroundColor: "#666",
+                  backgroundColor: "#018786",
+                  padding: 12,
+                  flex: 0.55,
+                  justifyContent: "center"
+                }}
+                onPress={this.onClickPicture}
+              >
+                <Text
+                  style={{ color: "#fff", fontSize: 24, textAlign: "center" }}
+                >
+                  {"TAKE \nPHOTO"}
+                </Text>
+              </TouchableHighlight>
+              <View style={{ flexDirection: "column", flex: 0.45 }}>
+                <TouchableHighlight
+                  style={{
+                    backgroundColor: "#666",
+                    padding: 12,
+                    flex: 1,
+                    justifyContent: "center"
+                  }}
+                  onPress={this.onClear}
+                >
+                  <Text
+                    style={{ color: "#fff", fontSize: 16, textAlign: "center" }}
+                  >
+                    {"CLEAR"}
+                  </Text>
+                </TouchableHighlight>
+                <TouchableHighlight
+                  style={{
+                    backgroundColor: "#f50057",
+                    padding: 12,
+                    flex: 1,
+                    justifyContent: "center"
+                  }}
+                  onPress={this.onExit}
+                >
+                  <Text
+                    style={{ color: "#fff", fontSize: 16, textAlign: "center" }}
+                  >
+                    {"EXIT"}
+                  </Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </Animatable.View>
+        ) : (
+          <Animatable.View
+            style={{ flex: 0.25 }}
+            animation="slideInRight"
+            useNativeDriver={true}
+          >
+            <View style={{ flexDirection: "row", flex: 0.75 }}>
+              <TouchableHighlight
+                style={{
+                  backgroundColor: "#018786",
                   padding: 12,
                   flex: 1,
                   justifyContent: "center"
                 }}
-                onPress={this.onClear}
+                onPress={() => {
+                  this.setState({
+                    takePhoto: true
+                  });
+                }}
               >
                 <Text
-                  style={{ color: "#fff", fontSize: 16, textAlign: "center" }}
+                  style={{ color: "#fff", fontSize: 24, textAlign: "center" }}
                 >
-                  {"CLEAR"}
+                  {"TAKE MORE PHOTOS"}
                 </Text>
               </TouchableHighlight>
               <TouchableHighlight
                 style={{
-                  backgroundColor: "#f50057",
+                  backgroundColor: "#FF9800",
                   padding: 12,
                   flex: 1,
                   justifyContent: "center"
                 }}
-                onPress={this.onExit}
+                onPress={() => {
+                  this.showUploadImageDialog();
+                }}
               >
                 <Text
-                  style={{ color: "#fff", fontSize: 16, textAlign: "center" }}
+                  style={{ color: "#fff", fontSize: 24, textAlign: "center" }}
                 >
-                  {"EXIT"}
+                  {"UPLOAD \nPHOTOS"}
                 </Text>
               </TouchableHighlight>
             </View>
-          </View>
-        </View>
-      </View>
+            <TouchableHighlight
+              style={{
+                backgroundColor: "#666",
+                padding: 12,
+                flex: 0.25,
+                justifyContent: "center"
+              }}
+              onPress={this.onClear}
+            >
+              <Text
+                style={{ color: "#fff", fontSize: 16, textAlign: "center" }}
+              >
+                {"CLEAR"}
+              </Text>
+            </TouchableHighlight>
+          </Animatable.View>
+        )}
+      </Animatable.View>
     );
   }
 
