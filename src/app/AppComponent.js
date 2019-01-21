@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import { Modal, View } from "react-native";
 import FlashMessage from "react-native-flash-message";
-import TakePicture from "../takePicture/TakePictureContainer";
+import AppNavigator from "./../navigator/AppNavigator";
 
 const defaultState = {
   isInitialised: false
@@ -24,7 +24,7 @@ export default class AppComponent extends Component<{}, {}> {
     if (this.props.isRehydrated) {
       return (
         <View style={{ flex: 1 }}>
-          <TakePicture style = {{ flex : 1}}/>
+          <AppNavigator style={{ flex: 1 }} />
           <Modal
             animationType="slide"
             transparent={true}
