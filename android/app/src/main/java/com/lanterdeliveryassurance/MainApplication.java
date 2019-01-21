@@ -1,4 +1,4 @@
-package com.lanterassurance;
+package com.lanterdeliveryassurance;
 
 import android.app.Application;
 
@@ -7,23 +7,15 @@ import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.jimmydaddy.imagemarker.ImageMarkerPackage;
 import io.invertase.firebase.RNFirebasePackage;
 import org.reactnative.camera.RNCameraPackage;
-import com.jimmydaddy.imagemarker.ImageMarkerPackage;
-
-import io.invertase.firebase.RNFirebasePackage;
-
-import org.reactnative.camera.RNCameraPackage;
 
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 
-import org.reactnative.camera.RNCameraPackage;
-
 import java.util.Arrays;
 import java.util.List;
 
-import io.invertase.firebase.RNFirebasePackage;
 import io.invertase.firebase.database.RNFirebaseDatabasePackage;
 import io.invertase.firebase.storage.RNFirebaseStoragePackage;
 import io.invertase.firebase.auth.RNFirebaseAuthPackage;
