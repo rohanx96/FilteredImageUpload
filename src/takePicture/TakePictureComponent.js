@@ -17,7 +17,8 @@ import {
   BackHandler,
   Platform,
   PermissionsAndroid,
-  TouchableOpacity
+  TouchableOpacity,
+  ActionSheetIOS
 } from "react-native";
 import { RNCamera } from "react-native-camera";
 import firebase, { auth } from "react-native-firebase";
@@ -56,7 +57,9 @@ export default class App extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.requestCameraPermissions();
+    if (Platform.OS === "android") {
+      this.requestCameraPermissions();
+    }
     if (auth().currentUser) {
       this.props.getHubs(this.customer);
     } else {
@@ -393,56 +396,143 @@ export default class App extends Component<Props, State> {
             style={{ flex: 0.25 }}
           >
             <View style={{ flexDirection: "row", backgroundColor: "#ddd" }}>
-              <Picker
-                style={styles.picker}
-                selectedValue={this.state.selectedPrimaryFilter}
-                mode="dropdown"
-                onValueChange={(itemValue, itemIndex) => {
-                  if (itemValue) {
-                    this.props.setPrimaryFilter(itemValue);
-                    this.props.getDealers(this.customer, itemValue);
+              {Platform.OS === "android" ? (
+                <Picker
+                  style={styles.picker}
+                  selectedValue={this.state.selectedPrimaryFilter}
+                  mode="dropdown"
+                  onValueChange={(itemValue, itemIndex) => {
+                    if (itemValue) {
+                      this.props.setPrimaryFilter(itemValue);
+                      this.props.getDealers(this.customer, itemValue);
+                    }
+                    this.setState({
+                      selectedPrimaryFilter: itemValue,
+                      selectedSecondaryFilter: undefined,
+                      pictureData: []
+                    });
+                  }}
+                  enabled={this.isPictureTaken() ? false : true}
+                >
+                  <Picker.Item
+                    key={"filler"}
+                    label={"-- Select Hub --"}
+                    value={undefined}
+                  />
+                  {this.props.hubs.map((data, index) => (
+                    <Picker.Item key={data} label={data} value={data} />
+                  ))}
+                </Picker>
+              ) : (
+                <TouchableOpacity
+                  style={{
+                    paddingVertical: 12,
+                    paddingHorizontal: 24,
+                    flex: 1
+                  }}
+                  onPress={() => {
+                    let options = this.props.hubs.slice();
+                    options.push("Cancel");
+                    ActionSheetIOS.showActionSheetWithOptions(
+                      {
+                        options: options,
+                        cancelButtonIndex: this.props.hubs.length,
+                        title: "Select Hub"
+                      },
+                      buttonIndex => {
+                        if (buttonIndex !== this.props.hubs.length) {
+                          this.props.setPrimaryFilter(
+                            this.props.hubs[buttonIndex]
+                          );
+                          this.props.getDealers(
+                            this.customer,
+                            this.props.hubs[buttonIndex]
+                          );
+                          this.setState({
+                            selectedPrimaryFilter: this.props.hubs[buttonIndex],
+                            selectedSecondaryFilter: undefined,
+                            pictureData: []
+                          });
+                        }
+                      }
+                    );
+                  }}
+                  disabled={this.isPictureTaken() ? true : false}
+                >
+                  <Text>
+                    {this.state.selectedPrimaryFilter
+                      ? this.state.selectedPrimaryFilter
+                      : "-- Select Hub --"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {Platform.OS === "android" ? (
+                <Picker
+                  style={styles.picker}
+                  mode="dropdown"
+                  selectedValue={this.state.selectedSecondaryFilter}
+                  onValueChange={(itemValue, itemIndex) =>
+                    this.setState({ selectedSecondaryFilter: itemValue })
                   }
-                  this.setState({
-                    selectedPrimaryFilter: itemValue,
-                    selectedSecondaryFilter: undefined,
-                    pictureData: []
-                  });
-                }}
-                enabled={this.isPictureTaken() ? false : true}
-              >
-                <Picker.Item
-                  key={"filler"}
-                  label={"-- Select Hub --"}
-                  value={undefined}
-                />
-                {this.props.hubs.map((data, index) => (
-                  <Picker.Item key={data} label={data} value={data} />
-                ))}
-              </Picker>
-              <Picker
-                style={styles.picker}
-                mode="dropdown"
-                selectedValue={this.state.selectedSecondaryFilter}
-                onValueChange={(itemValue, itemIndex) =>
-                  this.setState({ selectedSecondaryFilter: itemValue })
-                }
-                enabled={
-                  this.isPictureTaken()
-                    ? false
-                    : this.state.selectedPrimaryFilter
-                    ? true
-                    : false
-                }
-              >
-                <Picker.Item
-                  key={"filler"}
-                  label={"-- Select Dealer --"}
-                  value={undefined}
-                />
-                {this.props.dealers.map((data, index) => (
-                  <Picker.Item label={data} value={data} />
-                ))}
-              </Picker>
+                  enabled={
+                    this.isPictureTaken()
+                      ? false
+                      : this.state.selectedPrimaryFilter
+                      ? true
+                      : false
+                  }
+                >
+                  <Picker.Item
+                    key={"filler"}
+                    label={"-- Select Dealer --"}
+                    value={undefined}
+                  />
+                  {this.props.dealers.map((data, index) => (
+                    <Picker.Item label={data} value={data} />
+                  ))}
+                </Picker>
+              ) : (
+                <TouchableOpacity
+                  style={{
+                    paddingVertical: 12,
+                    paddingHorizontal: 24,
+                    flex: 1
+                  }}
+                  onPress={() => {
+                    let options = this.props.dealers.slice();
+                    options.push("Cancel");
+                    ActionSheetIOS.showActionSheetWithOptions(
+                      {
+                        options: options,
+                        cancelButtonIndex: this.props.dealers.length,
+                        title: "Select Dealer"
+                      },
+                      buttonIndex => {
+                        if (buttonIndex !== -1) {
+                          this.setState({
+                            selectedSecondaryFilter: this.props.dealers[
+                              buttonIndex
+                            ]
+                          });
+                        }
+                      }
+                    );
+                  }}
+                  disabled={
+                    !(this.isPictureTaken()
+                      ? false
+                      : this.state.selectedPrimaryFilter
+                      ? true
+                      : false)
+                  }
+                >
+                  <Text>
+                    {this.state.selectedSecondaryFilter
+                      ? this.state.selectedSecondaryFilter
+                      : "-- Select Dealer --"}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
             <View
               style={{ flex: 1, flexDirection: "row", alignItems: "stretch" }}
