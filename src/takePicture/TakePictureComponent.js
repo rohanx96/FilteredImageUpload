@@ -428,7 +428,11 @@ export default class App extends Component<Props, State> {
                   style={{
                     paddingVertical: 12,
                     paddingHorizontal: 24,
-                    flex: 1
+                    flex: 1,
+                    borderRightWidth: 1,
+                    borderRightColor: "#333",
+                    alignItems: "center",
+                    justifyContent: "center"
                   }}
                   onPress={() => {
                     let options = this.props.hubs.slice();
@@ -459,7 +463,13 @@ export default class App extends Component<Props, State> {
                   }}
                   disabled={this.isPictureTaken() ? true : false}
                 >
-                  <Text>
+                  <Text
+                    style={{
+                      color: this.isPictureTaken() ? "#888" : "#333",
+                      textAlign: "center",
+                      fontSize: 15
+                    }}
+                  >
                     {this.state.selectedPrimaryFilter
                       ? this.state.selectedPrimaryFilter
                       : "-- Select Hub --"}
@@ -496,7 +506,9 @@ export default class App extends Component<Props, State> {
                   style={{
                     paddingVertical: 12,
                     paddingHorizontal: 24,
-                    flex: 1
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center"
                   }}
                   onPress={() => {
                     let options = this.props.dealers.slice();
@@ -526,7 +538,19 @@ export default class App extends Component<Props, State> {
                       : false)
                   }
                 >
-                  <Text>
+                  <Text
+                    style={{
+                      color: !(this.isPictureTaken()
+                        ? false
+                        : this.state.selectedPrimaryFilter
+                        ? true
+                        : false)
+                        ? "#888"
+                        : "#333",
+                      textAlign: "center",
+                      fontSize: 15
+                    }}
+                  >
                     {this.state.selectedSecondaryFilter
                       ? this.state.selectedSecondaryFilter
                       : "-- Select Dealer --"}
