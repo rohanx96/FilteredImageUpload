@@ -376,7 +376,7 @@ export default class App extends Component<Props, State> {
             />
           )}
           {(!this.isPictureTaken() || this.state.takePhoto) &&
-            this.state.hasPermissions && (
+            (Platform.OS === "ios" || this.state.hasPermissions) && (
               <View style={{ flex: 1 }}>
                 <RNCamera
                   ref={ref => {
@@ -464,6 +464,7 @@ export default class App extends Component<Props, State> {
                   disabled={this.isPictureTaken() ? true : false}
                 >
                   <Text
+                    numberOfLines={2}
                     style={{
                       color: this.isPictureTaken() ? "#888" : "#333",
                       textAlign: "center",
@@ -520,7 +521,7 @@ export default class App extends Component<Props, State> {
                         title: "Select Dealer"
                       },
                       buttonIndex => {
-                        if (buttonIndex !== -1) {
+                        if (buttonIndex !== this.props.dealers.length) {
                           this.setState({
                             selectedSecondaryFilter: this.props.dealers[
                               buttonIndex
@@ -539,6 +540,7 @@ export default class App extends Component<Props, State> {
                   }
                 >
                   <Text
+                    numberOfLines={2}
                     style={{
                       color: !(this.isPictureTaken()
                         ? false
@@ -592,21 +594,27 @@ export default class App extends Component<Props, State> {
                     {"CLEAR"}
                   </Text>
                 </TouchableHighlight>
-                <TouchableHighlight
-                  style={{
-                    backgroundColor: "#f50057",
-                    padding: 12,
-                    flex: 1,
-                    justifyContent: "center"
-                  }}
-                  onPress={this.onExit}
-                >
-                  <Text
-                    style={{ color: "#fff", fontSize: 16, textAlign: "center" }}
+                {Platform.OS === "android" && (
+                  <TouchableHighlight
+                    style={{
+                      backgroundColor: "#f50057",
+                      padding: 12,
+                      flex: 1,
+                      justifyContent: "center"
+                    }}
+                    onPress={this.onExit}
                   >
-                    {"EXIT"}
-                  </Text>
-                </TouchableHighlight>
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontSize: 16,
+                        textAlign: "center"
+                      }}
+                    >
+                      {"EXIT"}
+                    </Text>
+                  </TouchableHighlight>
+                )}
               </View>
             </View>
           </Animatable.View>
