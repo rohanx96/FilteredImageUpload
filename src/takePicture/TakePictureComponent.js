@@ -567,7 +567,7 @@ export default class App extends Component<Props, State> {
                 style={{
                   backgroundColor: "#018786",
                   padding: 12,
-                  flex: 0.55,
+                  width: Platform.OS === "android" ? "55%" : "50%",
                   justifyContent: "center"
                 }}
                 onPress={this.onClickPicture}
@@ -578,7 +578,12 @@ export default class App extends Component<Props, State> {
                   {"TAKE \nPHOTO"}
                 </Text>
               </TouchableHighlight>
-              <View style={{ flexDirection: "column", flex: 0.45 }}>
+              <View
+                style={{
+                  flexDirection: "column",
+                  width: Platform.OS === "android" ? "55%" : "50%"
+                }}
+              >
                 <TouchableHighlight
                   style={{
                     backgroundColor: "#666",
