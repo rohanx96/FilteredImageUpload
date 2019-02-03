@@ -42,7 +42,8 @@
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		CE2767496A2C42928BF9EADB /* libRNCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DBF4318E11B444A290F1B792 /* libRNCamera.a */; };
-		D027F89622003CAB00FDD7AA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D027F89522003CAB00FDD7AA /* GoogleService-Info.plist */; };
+		D02BE8132203AB4600228D61 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
+		D02BE8152206DC1100228D61 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D02BE8142206DC1100228D61 /* GoogleService-Info.plist */; };
 		D065087D2201097F0040F5FF /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		DF8B8243A0554DA3ADB569F0 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 663EC79163224F7A964E057C /* libRNFirebase.a */; };
 		E85A6F0614F344199DC018E3 /* libRNGestureHandler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A34406CE2348CBBCD770E3 /* libRNGestureHandler.a */; };
@@ -394,7 +395,7 @@
 		B7056015A794C49FDD053402 /* Pods-FilteredImageUpload-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FilteredImageUpload-tvOSTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-FilteredImageUpload-tvOSTests/Pods-FilteredImageUpload-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		BCD2A541A9AB031C37E1868F /* libPods-FilteredImageUpload-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FilteredImageUpload-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9A34406CE2348CBBCD770E3 /* libRNGestureHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNGestureHandler.a; sourceTree = "<group>"; };
-		D027F89522003CAB00FDD7AA /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		D02BE8142206DC1100228D61 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DB5D68AFA64B667D0FF61BA2 /* libPods-FilteredImageUpload-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FilteredImageUpload-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBF4318E11B444A290F1B792 /* libRNCamera.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNCamera.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -640,7 +641,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				D027F89522003CAB00FDD7AA /* GoogleService-Info.plist */,
+				D02BE8142206DC1100228D61 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* FilteredImageUpload */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* FilteredImageUploadTests */,
@@ -1226,8 +1227,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				D02BE8152206DC1100228D61 /* GoogleService-Info.plist in Resources */,
 				D065087D2201097F0040F5FF /* LaunchScreen.xib in Resources */,
-				D027F89622003CAB00FDD7AA /* GoogleService-Info.plist in Resources */,
+				D02BE8132203AB4600228D61 /* main.jsbundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

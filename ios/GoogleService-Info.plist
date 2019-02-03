@@ -7,34 +7,36 @@
 	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
 	<string>ca-app-pub-3940256099942544/4411468910</string>
 	<key>CLIENT_ID</key>
-	<string>263838477249-gmsrn1gg5e6pafqgf1u7kq8je161l78s.apps.googleusercontent.com</string>
+	<string>831195163545-btkppge8v36th5oq63hto5q1t5dhfed5.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.263838477249-gmsrn1gg5e6pafqgf1u7kq8je161l78s</string>
+	<string>com.googleusercontent.apps.831195163545-btkppge8v36th5oq63hto5q1t5dhfed5</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>831195163545-5kotgppjhnj6e4msfes2p4r2ep8smfdo.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBWhOmyrcYB-93rFgGtWHwCqNsCuDEki9M</string>
+	<string>AIzaSyDZYPz9N_ufm-b7kocbNHwu9SMX-3rm2wA</string>
 	<key>GCM_SENDER_ID</key>
-	<string>263838477249</string>
+	<string>831195163545</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.lanterdeliveryassurance</string>
+	<string>com.lanterassurance</string>
 	<key>PROJECT_ID</key>
-	<string>lanter-assurance-dev</string>
+	<string>lanter-assurance-v1</string>
 	<key>STORAGE_BUCKET</key>
-	<string>lanter-assurance-dev.appspot.com</string>
+	<string>lanter-assurance-v1.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<true></true>
 	<key>IS_ANALYTICS_ENABLED</key>
 	<false></false>
 	<key>IS_APPINVITE_ENABLED</key>
-	<false></false>
+	<true></true>
 	<key>IS_GCM_ENABLED</key>
 	<true></true>
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:263838477249:ios:3e8db461c1756be0</string>
+	<string>1:831195163545:ios:a5ed41e28bbd618f</string>
 	<key>DATABASE_URL</key>
-	<string>https://lanter-assurance-dev.firebaseio.com</string>
+	<string>https://lanter-assurance-v1.firebaseio.com</string>
 </dict>
 </plist>
