@@ -48,7 +48,7 @@ export default class App extends Component<Props, State> {
     super(props);
     this.state = defaultState;
     this.state.selectedPrimaryFilter = this.props.selectedPrimaryFilter;
-    this.customer = "HYU";
+    this.customer = props.customer;
     this.onClickPicture = this.onClickPicture.bind(this);
     this.createFileName = this.createFileName.bind(this);
     this.requestCameraPermissions = this.requestCameraPermissions.bind(this);

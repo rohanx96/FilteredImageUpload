@@ -1,14 +1,15 @@
-//@flow
+// @flow
 import { connect } from "react-redux";
 import TakePicture from "./TakePictureComponent";
 import { getHubs, getDealers } from "./TakePictureAction";
-import { setPrimaryFilter } from "./../common/actions/PersistAction";
-import { closeBottomSheet, openBottomSheet } from "./../app/AppAction";
+import { setPrimaryFilter } from "../common/actions/PersistAction";
+import { closeBottomSheet, openBottomSheet } from "../app/AppAction";
 
 const mapStateToProps = state => ({
   selectedPrimaryFilter: state.persist.selectedPrimaryFilter,
   hubs: state.takePicture.hubs,
-  dealers: state.takePicture.dealers
+  dealers: state.takePicture.dealers,
+  customer: state.persist.customer
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -1,7 +1,7 @@
 import firebase from "react-native-firebase";
-import { openBottomSheet, closeBottomSheet } from "./../app/AppAction";
-import { loaderDialog } from "./../common/BottomDialogs";
-import { showMessage, hideMessage } from "react-native-flash-message";
+import { showMessage } from "react-native-flash-message";
+import { openBottomSheet, closeBottomSheet } from "../app/AppAction";
+import { loaderDialog } from "../common/BottomDialogs";
 
 export const ACTION_TYPE = {
   setHubs: "SET_HUBS",
@@ -22,8 +22,8 @@ export function setDealers(dealers) {
   };
 }
 
-export function getHubs(customer) {
-  return function(dispatch, state) {
+export function getDealers(customer, hub) {
+  return function dispatchGetDealers(dispatch) {
     dispatch(
       openBottomSheet(() => {
         return loaderDialog("Fetching data. Please Wait", undefined);
@@ -32,27 +32,22 @@ export function getHubs(customer) {
     firebase
       .database()
       .ref("allData")
-      .orderByChild("CUSTOMER")
-      .equalTo(customer)
+      .orderByChild("CUSTOMER_HUB")
+      .equalTo(customer + hub)
       .once(
         "value",
         snapshot => {
-          let hubs = [];
+          dispatch(closeBottomSheet());
+          const dealers = [];
           console.log(snapshot);
           snapshot.forEach(data => {
-            if (hubs.indexOf(data.val().HUB) == -1) {
-              hubs.push(data.val().HUB);
+            if (dealers.indexOf(data.val().DEALER) === -1) {
+              dealers.push(data.val().DEALER);
             }
           });
-          hubs.sort();
-          dispatch(setHubs(hubs));
-          console.log(state().persist.selectedPrimaryFilter);
+          dealers.sort();
+          dispatch(setDealers(dealers));
           dispatch(closeBottomSheet());
-          if (state().persist.selectedPrimaryFilter) {
-            dispatch(
-              getDealers(customer, state().persist.selectedPrimaryFilter)
-            );
-          }
         },
         err => {
           dispatch(closeBottomSheet());
@@ -68,8 +63,8 @@ export function getHubs(customer) {
   };
 }
 
-export function getDealers(customer, hub) {
-  return function(dispatch, state) {
+export function getHubs(customer) {
+  return function dispatchGetHubs(dispatch, state) {
     dispatch(
       openBottomSheet(() => {
         return loaderDialog("Fetching data. Please Wait", undefined);
@@ -78,22 +73,27 @@ export function getDealers(customer, hub) {
     firebase
       .database()
       .ref("allData")
-      .orderByChild("CUSTOMER_HUB")
-      .equalTo(customer + hub)
+      .orderByChild("CUSTOMER")
+      .equalTo(customer)
       .once(
         "value",
         snapshot => {
-          dispatch(closeBottomSheet());
-          let dealers = [];
+          const hubs = [];
           console.log(snapshot);
           snapshot.forEach(data => {
-            if (dealers.indexOf(data.val().DEALER) == -1) {
-              dealers.push(data.val().DEALER);
+            if (hubs.indexOf(data.val().HUB) === -1) {
+              hubs.push(data.val().HUB);
             }
           });
-          dealers.sort();
-          dispatch(setDealers(dealers));
+          hubs.sort();
+          dispatch(setHubs(hubs));
+          console.log(state().persist.selectedPrimaryFilter);
           dispatch(closeBottomSheet());
+          if (state().persist.selectedPrimaryFilter) {
+            dispatch(
+              getDealers(customer, state().persist.selectedPrimaryFilter)
+            );
+          }
         },
         err => {
           dispatch(closeBottomSheet());

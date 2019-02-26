@@ -3,7 +3,7 @@ import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { appReducer } from "../../app/AppReducer";
 import { takePictureReducer } from "../../takePicture/TakePictureReducer";
-import { PersistReducer } from "./PersistReducer";
+import persistDataReducer from "./PersistReducer";
 import signInReducer from "../../login/SignInReducer";
 
 const persistConfig = {
@@ -16,7 +16,7 @@ const persistConfig = {
 const AppReducer = combineReducers({
   app: appReducer,
   takePicture: takePictureReducer,
-  persist: PersistReducer,
+  persist: persistDataReducer,
   signIn: signInReducer
 });
 
