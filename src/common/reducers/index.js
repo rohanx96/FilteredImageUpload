@@ -1,14 +1,14 @@
-//@flow
-import { appReducer } from "./../../app/AppReducer";
-import { takePictureReducer } from "./../../takePicture/TakePictureReducer";
 import { combineReducers } from "redux";
-import { PersistReducer } from "./PersistReducer";
-import { persistReducer, createTransform } from "redux-persist";
+import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
+import { appReducer } from "../../app/AppReducer";
+import { takePictureReducer } from "../../takePicture/TakePictureReducer";
+import { PersistReducer } from "./PersistReducer";
+import signInReducer from "../../login/SignInReducer";
 
 const persistConfig = {
+  storage,
   key: "root",
-  storage: storage,
   whitelist: ["persist"],
   debug: true
 };
@@ -16,7 +16,8 @@ const persistConfig = {
 const AppReducer = combineReducers({
   app: appReducer,
   takePicture: takePictureReducer,
-  persist: PersistReducer
+  persist: PersistReducer,
+  signIn: signInReducer
 });
 
 const RootReducer = (state, action) => {
