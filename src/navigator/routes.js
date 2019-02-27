@@ -1,11 +1,15 @@
-import TakePicture from "./../takePicture/TakePictureContainer";
-import ImageViewer from "./../imageViewer/ImageViewer";
+import TakePicture from "../takePicture/TakePictureContainer";
+import ImageViewer from "../imageViewer/ImageViewer";
+import SignIn from "../login/SignInContainer";
 
-export default (routes = {
+export default {
+  SignIn: {
+    screen: SignIn
+  },
   TakePicture: {
     screen: TakePicture
   },
   ImageViewer: {
-      screen : ImageViewer
+    screen: ImageViewer
   }
-});
+};

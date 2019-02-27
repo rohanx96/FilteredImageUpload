@@ -2,7 +2,7 @@
 import { connect } from "react-redux";
 import TakePicture from "./TakePictureComponent";
 import { getHubs, getDealers } from "./TakePictureAction";
-import { setPrimaryFilter } from "../common/actions/PersistAction";
+import { setPrimaryFilter, reset } from "../common/actions/PersistAction";
 import { closeBottomSheet, openBottomSheet } from "../app/AppAction";
 
 const mapStateToProps = state => ({
@@ -19,7 +19,8 @@ const mapDispatchToProps = dispatch => ({
   getHubs: customer => dispatch(getHubs(customer)),
   getDealers: (customer, hub) => dispatch(getDealers(customer, hub)),
   setPrimaryFilter: selectedPrimaryFilter =>
-    dispatch(setPrimaryFilter(selectedPrimaryFilter))
+    dispatch(setPrimaryFilter(selectedPrimaryFilter)),
+  reset: () => dispatch(reset())
 });
 
 export default connect(

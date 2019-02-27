@@ -1,7 +1,7 @@
-//@flow weak
 export const ACTION_TYPE = {
   setPrimaryFilter: "SET_PRIMARY_FILTER",
-  setCustomer: "SET_CUSTOMER"
+  setCustomer: "SET_CUSTOMER",
+  reset: "RESET"
 };
 
 export function setPrimaryFilter(data) {
@@ -15,5 +15,11 @@ export function setCustomer(data) {
   return {
     type: ACTION_TYPE.setCustomer,
     payload: data
+  };
+}
+
+export function reset() {
+  return {
+    type: ACTION_TYPE.reset
   };
 }

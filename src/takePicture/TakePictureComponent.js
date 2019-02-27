@@ -14,14 +14,14 @@ import {
   Picker,
   TouchableHighlight,
   Image,
-  BackHandler,
   Platform,
   PermissionsAndroid,
   TouchableOpacity,
   ActionSheetIOS
 } from "react-native";
 import { RNCamera } from "react-native-camera";
-import firebase, { auth } from "react-native-firebase";
+import firebase from "react-native-firebase";
+import { StackActions, NavigationActions } from "react-navigation";
 import moment from "moment";
 import { showMessage, hideMessage } from "react-native-flash-message";
 import {
@@ -60,24 +60,7 @@ export default class App extends Component<Props, State> {
     if (Platform.OS === "android") {
       this.requestCameraPermissions();
     }
-    if (auth().currentUser) {
-      this.props.getHubs(this.customer);
-    } else {
-      auth()
-        .signInAnonymously()
-        .then(data => {
-          console.log("---SIGNED IN ---");
-          this.props.getHubs(this.customer);
-        })
-        .catch(err => {
-          showMessage({
-            description:
-              "Please make sure you are connected to the internet and try again.",
-            message: "Failed to fetch data",
-            type: "danger"
-          });
-        });
-    }
+    this.props.getHubs(this.customer);
   }
 
   requestCameraPermissions() {
@@ -344,9 +327,14 @@ export default class App extends Component<Props, State> {
     }, false);
   };
 
-  onExit() {
-    BackHandler.exitApp();
-  }
+  onSignOut = () => {
+    this.props.reset();
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: "SignIn" })]
+    });
+    this.props.navigation.dispatch(resetAction);
+  };
 
   createFileName(addLineBreaks, timestamp) {
     let fileName =
@@ -567,7 +555,7 @@ export default class App extends Component<Props, State> {
                 style={{
                   backgroundColor: "#018786",
                   padding: 12,
-                  width: Platform.OS === "android" ? "55%" : "50%",
+                  width: "50%",
                   justifyContent: "center"
                 }}
                 onPress={this.onClickPicture}
@@ -581,7 +569,7 @@ export default class App extends Component<Props, State> {
               <View
                 style={{
                   flexDirection: "column",
-                  width: Platform.OS === "android" ? "55%" : "50%"
+                  width: "50%"
                 }}
               >
                 <TouchableHighlight
@@ -599,27 +587,26 @@ export default class App extends Component<Props, State> {
                     {"CLEAR"}
                   </Text>
                 </TouchableHighlight>
-                {Platform.OS === "android" && (
-                  <TouchableHighlight
+
+                <TouchableHighlight
+                  style={{
+                    backgroundColor: "#f50057",
+                    padding: 12,
+                    flex: 1,
+                    justifyContent: "center"
+                  }}
+                  onPress={this.onSignOut}
+                >
+                  <Text
                     style={{
-                      backgroundColor: "#f50057",
-                      padding: 12,
-                      flex: 1,
-                      justifyContent: "center"
+                      color: "#fff",
+                      fontSize: 16,
+                      textAlign: "center"
                     }}
-                    onPress={this.onExit}
                   >
-                    <Text
-                      style={{
-                        color: "#fff",
-                        fontSize: 16,
-                        textAlign: "center"
-                      }}
-                    >
-                      {"EXIT"}
-                    </Text>
-                  </TouchableHighlight>
-                )}
+                    {"SIGN OUT"}
+                  </Text>
+                </TouchableHighlight>
               </View>
             </View>
           </Animatable.View>

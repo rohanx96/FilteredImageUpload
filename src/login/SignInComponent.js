@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { StackActions, NavigationActions } from "react-navigation";
 import { showMessage } from "react-native-flash-message";
+import { auth } from "react-native-firebase";
 
 const logoTextImage = require("../assets/logo_text.png");
 
@@ -19,10 +20,38 @@ export default class SignInComponent extends Component {
     this.state = {
       selectedCustomer: undefined
     };
+    if (props.selectedCustomer) {
+      this.resetToHome();
+    }
   }
 
   componentDidMount() {
-    this.props.getCustomers();
+    if (auth().currentUser) {
+      this.props.getCustomers();
+    } else {
+      auth()
+        .signInAnonymously()
+        .then(data => {
+          console.log("---SIGNED IN ---");
+          this.props.getCustomers();
+        })
+        .catch(err => {
+          showMessage({
+            description:
+              "Please make sure you are connected to the internet and try again.",
+            message: "Failed to fetch data",
+            type: "danger"
+          });
+        });
+    }
+  }
+
+  resetToHome() {
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: "TakePicture" })]
+    });
+    this.props.navigation.dispatch(resetAction);
   }
 
   render() {
@@ -34,27 +63,42 @@ export default class SignInComponent extends Component {
           resizeMode="contain"
         />
         {Platform.OS === "android" ? (
-          <Picker
-            selectedValue={this.state.selectedCustomer}
-            mode="dropdown"
-            onValueChange={itemValue => {
-              if (itemValue) {
-                this.props.setCustomer(itemValue);
-              }
-              this.setState({
-                selectedCustomer: itemValue
-              });
+          <View
+            style={{
+              borderRadius: 24,
+              width: "60%",
+              alignItems: "center",
+              backgroundColor: "#ddd",
+              justifyContent: "center",
+              overflow: "hidden"
             }}
           >
-            <Picker.Item
-              key="filler"
-              label="-- Select Customer --"
-              value={undefined}
-            />
-            {this.props.customers.map(data => (
-              <Picker.Item key={data} label={data} value={data} />
-            ))}
-          </Picker>
+            <Picker
+              style={{
+                width: "80%",
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+              selectedValue={this.state.selectedCustomer}
+              mode="dropdown"
+              onValueChange={itemValue => {
+                if (itemValue) {
+                  this.setState({
+                    selectedCustomer: itemValue
+                  });
+                }
+              }}
+            >
+              <Picker.Item
+                key="filler"
+                label="Select Customer"
+                value={undefined}
+              />
+              {this.props.customers.map(data => (
+                <Picker.Item key={data} label={data} value={data} />
+              ))}
+            </Picker>
+          </View>
         ) : (
           <TouchableOpacity
             style={{
@@ -77,7 +121,6 @@ export default class SignInComponent extends Component {
                 },
                 buttonIndex => {
                   if (buttonIndex !== this.props.customers.length) {
-                    this.props.setCustomer(this.props.customers[buttonIndex]);
                     this.setState({
                       selectedCustomer: this.props.customers[buttonIndex]
                     });
@@ -112,13 +155,8 @@ export default class SignInComponent extends Component {
           }}
           onPress={() => {
             if (this.state.selectedCustomer) {
-              const resetAction = StackActions.reset({
-                index: 0,
-                actions: [
-                  NavigationActions.navigate({ routeName: "TakePicture" })
-                ]
-              });
-              this.props.navigation.dispatch(resetAction);
+              this.props.setCustomer(this.state.selectedCustomer);
+              this.resetToHome();
             } else {
               showMessage({
                 type: "danger",

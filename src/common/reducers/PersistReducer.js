@@ -13,5 +13,11 @@ export default createReducer(initState, {
     return Object.assign({}, state, {
       customer: action.payload
     });
+  },
+  [ACTION_TYPE.reset](state) {
+    return Object.assign({}, state, {
+      customer: undefined,
+      selectedPrimaryFilter: undefined
+    });
   }
 });
